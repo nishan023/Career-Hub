@@ -5,6 +5,7 @@
   "scripts": {
     "dev": "nodemon ./src/main.ts",
     "start": "nodemon ./src/main.ts",
+    "starts": "node main.ts",
     "format": "prettier --write .",
     "deploy-migrate": "npx prisma migrate deploy && npm run start"
   },

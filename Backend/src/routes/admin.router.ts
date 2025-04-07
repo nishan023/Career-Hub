@@ -10,5 +10,6 @@ const router = Router();
 // Admin authentication routes
 router.post("/admin/login", validate(loginSchema), adminController.login);
 router.post("/admin/signup", validate(signupSchema), adminController.signup);
+router.get("/admin/profile",authenticateToken,adminController.getProfile);
 
 export default router;

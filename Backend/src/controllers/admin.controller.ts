@@ -2,6 +2,7 @@ import { Request, Response, NextFunction } from "express";
 import * as adminService from "../services/admin.service";
 import { loginBodyDTO } from "../validator/loginvalidator";
 import { signupBodyDTO } from "../validator/signup.validator";
+import { RequestWithUserObject } from "../types";
 
 // Admin login
 export const login = async (
@@ -48,6 +49,28 @@ export const signup = async (
           email: newAdmin.email,
           userName: newAdmin.userName,
         },
+      },
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const getProfile = async (
+  req: RequestWithUserObject,
+  res: Response,
+  next: NextFunction
+) => {
+  try {
+    const userId = req.user.userId;
+
+    const adminProfile = await adminService.getAdminProfile(userId);
+
+    res.json({
+      success: true,
+      message: "Admin profile retrieved successfully",
+      data: {
+        admin: adminProfile, // includes isAdmin: true
       },
     });
   } catch (error) {

@@ -1,5 +1,5 @@
 import { PrismaClient } from '@prisma/client'
-import { compare, hash } from 'bcrypt'
+import { compare, hash,genSalt } from 'bcrypt'
 import { AppError } from '../utils/error'
 import { createAccessToken, createRefreshToken } from '../utils/token.utils'
 import { ILoginBody, ISignupBody, UserJWTPayload } from '../types'
@@ -33,7 +33,7 @@ export const login = async (userData:ILoginBody) => {
     return { accessToken, refreshToken }
 }
 
-// Admin signup - 
+// Admin signup 
 export const signup = async (adminData: ISignupBody) => {
     const { email, password, username } = adminData
 
@@ -45,7 +45,8 @@ export const signup = async (adminData: ISignupBody) => {
         throw new AppError('Admin with this email already exists', 409)
     }
 
-    const hashedPassword = await hash(password, 10)
+      const genSalts = await genSalt(10);
+      const hashedPassword = await hash(password, genSalts);
 
     const newAdmin = await prisma.admin.create({
         data: {
@@ -61,3 +62,31 @@ export const signup = async (adminData: ISignupBody) => {
         userName: newAdmin.userName
     }
 }
+
+
+//get user profile
+export const getAdminProfile = async (userId: number) => {
+  const admin = await prisma.user.findUnique({
+    where: { id: userId },
+    select: {
+      id: true,
+      email: true,
+      username: true,
+    },
+  });
+
+  if (!admin) {
+    throw new AppError("User not found", 404);
+  }
+  // Check if user exists in the Admin table
+  const isAdmin = !!(await prisma.admin.findFirst({
+    where: { email: admin.email },
+  }));
+
+  return {
+    id: admin.id,
+    email: admin.email,
+    username: admin.username,
+    isAdmin:true // will be true or false
+  };
+};
